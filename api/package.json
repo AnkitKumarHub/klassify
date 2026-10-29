@@ -10,7 +10,8 @@
     "start": "node dist/server.js",
     "typecheck": "tsc -p . --noEmit",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate"
+    "db:migrate": "drizzle-kit migrate",
+    "db:seed": "node dist/db/seed.js"
   },
   "devEngines": {
     "packageManager": {

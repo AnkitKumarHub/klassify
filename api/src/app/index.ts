@@ -4,6 +4,8 @@ import express, { type Application } from "express";
 import { loadEnv } from "../env.js";
 import { mountAuthRoutes } from "./auth/auth.module.js";
 import { errorHandler, notFoundHandler } from "./shared/error-handler.js";
+import { mountTicketRoutes } from "./tickets/ticket.module.js";
+import { mountUserRoutes } from "./users/user.module.js";
 
 export function createServerApplication(): Application {
   const env = loadEnv();
@@ -17,20 +19,19 @@ export function createServerApplication(): Application {
       methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     }),
   );
-  app.use(express.json({ limit: "1mb" }));
+  app.use(express.json());
 
   app.get("/health", (_req, res) => {
     res.json({
       status: "ok",
       service: "support-portal-api",
-      uptime: Math.round(process.uptime()),
       timestamp: new Date().toISOString(),
     });
   });
 
   mountAuthRoutes(app);
-
-  // Users and tickets routers get mounted here as they are built.
+  mountTicketRoutes(app);
+  mountUserRoutes(app);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

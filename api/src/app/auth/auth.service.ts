@@ -3,7 +3,6 @@ import bcrypt from "bcryptjs";
 import { and, eq, gt, isNull } from "drizzle-orm";
 import type { Response } from "express";
 import { db } from "../../db/index.js";
-import { loadEnv } from "../../env.js";
 import { refreshTokens, users } from "../../db/schema.js";
 import { AppError } from "../shared/errors.js";
 import { signAccess, signRefresh, verifyRefresh } from "../shared/jwt.js";
@@ -19,16 +18,15 @@ const INVALID_LOGIN = "Invalid email or password.";
 const AUTH_REQUIRED = "Authentication required.";
 const BCRYPT_ROUNDS = 12;
 
+// One cookie policy for every environment, so local behaviour matches
+// production instead of hiding cross-site problems until deploy. SameSite=None
+// is only honoured together with Secure, so Secure stays on everywhere:
+// browsers count localhost as a secure origin and accept it over http://.
 function cookieOptions(maxAge?: number) {
-  const isProduction = loadEnv().NODE_ENV === "production";
   return {
     httpOnly: true,
-    // Lax is enough here: the web app and the API share the `localhost` site in
-    // development and are expected behind one domain in production. It also
-    // means no Secure flag is needed locally, where http:// would drop the
-    // cookie in Firefox and Safari.
-    sameSite: "lax" as const,
-    secure: isProduction,
+    sameSite: "none" as const,
+    secure: true,
     path: "/",
     ...(maxAge === undefined ? {} : { maxAge }),
   };
